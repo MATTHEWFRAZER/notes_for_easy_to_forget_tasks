@@ -1,0 +1,65 @@
+# to load driver
+insmod driver_name.ko
+
+# to unload driver
+rmmod driver_name
+
+# to list drivers
+lsmod
+
+# this is how we find the base address of the driver in question
+sudo cat /proc/modules | grep driver_name
+
+## KGDB START
+
+this video is great https://www.youtube.com/watch?v=67cxIXLCfUk&t=82s
+but instead of the pipe name in the video use \\.\pipe\<pipe_name>
+
+sudo apt-get install openssh-server
+
+TARGET MACHINE
+first we get edit /boot/grub/grub.cfg
+we edit that file, search for Ubuntu, the entry there has a reference to the linuz
+file, then we append kgdbwait kgdboc=ttyS0,115200
+
+add serial port in virtual box (Port Mode: Host Pipe)
+DO NOT check Connect to existing pipe/socket
+
+HOST MACHINE
+add serial port in virtual box (Port Mode: Host Pipe)
+check Connect to existing pipe/socket
+
+gdb vmlinux
+it should load symbols
+then when gdb is fired up run:
+target remote /dev/ttyS0
+continue
+
+## KGDB STOP
+
+## DEBUGGING THE DRIVER START
+# disassemble command in gdb
+gdb -batch -ex "disassemble/rs symbol_name" driver_name.ko
+
+# build with debug symbols
+# in the MakeFile
+ccyflags += -g -DDEBUG
+
+# verify symbol table was added
+readelf -S driver_name | grep debug
+
+# this is the offset of .text
+readelf -WS driver_name.ko | grep .text | awk '{ print $6 }'
+
+# we need to get the address where the driver is loaded
+# first we check the location of module sections
+ls -A1 /sys/module/driver_name/sections
+
+# then we cat each section we want
+sudo cat /sys/module/driver_name/sections/.text /sys/module/driver_name/sections/.data /sys/module/driver_name/sections/.bss ... 
+
+# fire up gdb, and provide the .text offset as the second argument to 
+# add-symbol-file (the first argument is the path to the .ko file)
+add-symbol-file driver_name.ko address
+## DEBUGGING THE DRIVER END
+
