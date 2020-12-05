@@ -1,0 +1,2 @@
+irritating, but to link against static library, assuming library is in current directory (NOTE: no spaces between -Ldir. and -l, and also -I):
+gcc main.c -I../external/fann-install/include -Ldir.-l:libfann.a
