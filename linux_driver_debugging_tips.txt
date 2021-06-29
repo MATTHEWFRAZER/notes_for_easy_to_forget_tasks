@@ -63,3 +63,24 @@ sudo cat /sys/module/driver_name/sections/.text /sys/module/driver_name/sections
 add-symbol-file driver_name.ko address
 ## DEBUGGING THE DRIVER END
 
+
+####### MORE
+1. objdump --section-headers name_of_module.ko | grep .text
+
+
+2. less /proc/modules | grep name_of_module
+3. add the 6th column of objdump with driver address
+
+##########################
+check loaded modules with gdb
+- after target process is running
+i sh
+
+##########################
+gdb set break point somewhere
+- to have source view first point to source using dir <source directory> then ctrl-x + ctrl-a
+
+##########################
+
+info functions
+###### MORE END

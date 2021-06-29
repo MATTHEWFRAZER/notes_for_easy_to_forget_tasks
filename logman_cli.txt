@@ -1,0 +1,7 @@
+source: https://ss64.com/nt/logman.html
+
+every module: 
+logman start tracelog -p {XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX} 0x10 win:Verbose -o tracelog.etl -ets
+
+rollover after 10MB, with only a particular module logging (the 0x00000001 is the mask you define from your tracing setup):
+logman start tracelog -p {XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX} 0x01 win:Informational -mode newfile -max 10 -o tracelog%d.etl -ets

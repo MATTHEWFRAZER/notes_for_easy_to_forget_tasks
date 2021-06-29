@@ -1,0 +1,58 @@
+host machine = the machine with the debugger
+target machine = the machine that will be paused
+
+network setup:
+1. bcdedit /debug on
+2. bcdedit /dbgsettings net hostip:<hostip (the machine with the debugger)> port:<port within acceptable range>
+3. the above bcdedit command will generate a key, use that key on the host machine and run the below command
+
+"C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\windbg.exe" -k net:port=<the above port within acceptable range>,key=<generated key>
+
+
+virtual serial port setup (vsphere):
+source: https://social.technet.microsoft.com/wiki/contents/articles/7373.remote-kernel-debugging-using-namepipe.aspx
+on target machine:
+1. Retrieve the com port number by noting which com ports are available (check with device manager), when you add the new serial device a new com port will appear
+2. Add new serial port (use named pipe: named //./pipe/<name of pipe>, select this end is the server, do not select yield CPU on poll) 
+3. bcdedit /debug on
+4. bcdedit /dbgsettings Serial debugport:<com port number> baudrate:115200
+
+using windbg on your host machine:
+File -> KernelDebugging. Select COM tab, keep baudrate 115200, select Pipe, select Reconnect, Rests = 0, Port: \\.\pipe\<name of pipe>
+
+some older notes:
+remote dbg
+
+on target computer:
+1) bcdedit /debug on
+2) bcdedit /dbgsettings net hostip:w.x.y.z port:n
+3) Get-NetAdapterHardwareInfo | Sort-Object Bus,Function
+4) bcdedit /set "{dbgsettings}" busparams b.d.f
+5) reboot
+
+actual physical machine over ethernet local connection
+same set up on host (take into account that on reboot a machine gets an autoconfigured ip)
+for test machine:
+"C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\windbg.exe" -k net:port=<port within acceptable range>,key=<generated key>,target=<target auto-configured ip>
+also issue this command before reboot: bcdedit /set “{current}” bootmenupolicy legacy
+also Disable driver signature enforcement (press F8 and select "Disable driver signature enforcement" or press Shift + restart and select the same)
+
+*load symbols by parent directory
+*will break on bugcheck
+*g for go
+*view callstack
+
+Userland:
+1) open on target machine
+2) File -> Open Executable
+3) windbg will break before modules are loaded
+4) set break point (module will be deferred)
+5) most commands are the same
+
+IRQL LOGGING:
+!verifier 8 ;* show IRQL log
+
+fltkd.volumes -> lists volumes on target
+fltkd.volume <address> -> lists information on volume
+
+!object (object querying and such)

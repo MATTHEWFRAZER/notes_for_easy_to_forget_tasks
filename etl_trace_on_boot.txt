@@ -1,0 +1,13 @@
+source: https://docs.microsoft.com/en-us/windows/win32/etw/configuring-and-starting-an-autologger-session
+
+1. create key under HKEY_LOCAL_MACHINE -> SYSTEM -> CurrentControlSet -> Control -> WMI -> Autologger
+2. I named the key LoggerSessionA
+3. Under LoggerSessionA create another key and name it using the trace guid of the driver (the key name is literally the driver's trace guid in the following format {XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX})
+4. Under LoggerSessionA create the following values:
+  a) FileName : REG_SZ : <path to etl you want to output to>
+  b) Guid : REG_SZ : <generate a new guid using VS> (in the following format {XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX})
+  c) Start : REG_DWORD : 0x00000001
+5. Under {XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX} (the driver's trace guid key, in the following format {XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}) create the following values
+  a) Enabled : REG_DWORD : 0x00000001
+  b) EnableFlags : REG_DWORD : 0xFFFFFFFF
+  c) EnableLevel : REG_DWORD : 0x00000005

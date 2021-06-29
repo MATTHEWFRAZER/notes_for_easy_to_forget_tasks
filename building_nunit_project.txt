@@ -1,0 +1,4 @@
+1) msbuild -t:restore
+2) msbuild  /tv:Current /p:TargetFramework=v4.5 /p:langversion=latest <path-to-csproj>
+3) install nunit
+4) nunuit <path-to-dll>
