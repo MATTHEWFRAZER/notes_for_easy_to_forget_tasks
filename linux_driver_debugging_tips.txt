@@ -18,9 +18,14 @@ but instead of the pipe name in the video use \\.\pipe\<pipe_name>
 sudo apt-get install openssh-server
 
 TARGET MACHINE
-first we get edit /boot/grub/grub.cfg
-we edit that file, search for Ubuntu, the entry there has a reference to the linuz
-file, then we append kgdbwait kgdboc=ttyS0,115200
+
+1. edit /etc/default grub. Make sure the following lines are present/uncommented:
+GRUB_HIDDEN_TIMEOUT=0
+GRUB_HIDDEN_TIMEOUT_QUIET=true
+2. run update-grub
+3. after update-grub (make sure its after, update-grub edits grub.cfg) we then edit /boot/grub/grub.cfg 
+we edit that file, search for Ubuntu, the entry there has a reference to the linuz (look for the first entry for linux, currently it is a line that looks like this: linux /boot/vmlinuz-5.4.0-74-generic root=UUID=e76aca59-16lb-4064-a8ea-13beb34858e0 ro quiet splash)
+file, then we then append the following at the end of the line: kgdbwait kgdboc=ttyS0,115200
 
 add serial port in virtual box (Port Mode: Host Pipe)
 DO NOT check Connect to existing pipe/socket
@@ -43,24 +48,25 @@ gdb -batch -ex "disassemble/rs symbol_name" driver_name.ko
 
 # build with debug symbols
 # in the MakeFile
-ccyflags += -g -DDEBUG
+ccflags-y += -g -DDEBUG
 
 # verify symbol table was added
 readelf -S driver_name | grep debug
-
-# this is the offset of .text
-readelf -WS driver_name.ko | grep .text | awk '{ print $6 }'
 
 # we need to get the address where the driver is loaded
 # first we check the location of module sections
 ls -A1 /sys/module/driver_name/sections
 
-# then we cat each section we want
+# then we cat each section we want to the loaded address of
 sudo cat /sys/module/driver_name/sections/.text /sys/module/driver_name/sections/.data /sys/module/driver_name/sections/.bss ... 
 
 # fire up gdb, and provide the .text offset as the second argument to 
 # add-symbol-file (the first argument is the path to the .ko file)
-add-symbol-file driver_name.ko address
+add-symbol-file driver_name.ko <address_of_text_section>
+
+
+after continuing and letting the target machine run, you can break into it again through running the following on the target machine:
+sudo echo g > /proc/sysrq-trigger
 ## DEBUGGING THE DRIVER END
 
 
