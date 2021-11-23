@@ -56,3 +56,8 @@ fltkd.volumes -> lists volumes on target
 fltkd.volume <address> -> lists information on volume
 
 !object (object querying and such)
+
+!lock (check which locks are held by whom, helpful in seeing if a thread is holding up an irp, especially pnp operations)
+
+execute on break:
+bp MyDriver!SymbolOrWhatever "dv /b myVarAddress; g"
