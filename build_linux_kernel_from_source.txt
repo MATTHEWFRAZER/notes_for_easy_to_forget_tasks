@@ -1,0 +1,9 @@
+1. downoad target release
+2. extract source: tar xvf linux-x.y.z.tar.xz
+3. sudo apt-get install git fakeroot build-essential ncurses-dev xz-utils libssl-dev bc flex libelf-dev bison
+4. cd linux-x.y.z
+5. cp -v /boot/config-$(uname -r) .config
+6. make menuconfig
+7. make
+8. sudo make modules_install
+9. sudo make install
