@@ -1,0 +1,7 @@
+bluez install
+1. sudo apt-get install libglib2.0-0 libglib2.0-dev (for glib 2.28 < issue)
+2. sudo apt-get install python-docutils (for rst2man issue)
+3. make sure line endings for files don't cause problems (for /bin/sh^M problem in ./obexd/src/genbuiltins and compilitation error in /src/plugin.c caused by /src/genbuiltins)
+3. autoreconf --install
+4. ./configure
+5. make
