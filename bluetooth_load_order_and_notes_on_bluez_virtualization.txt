@@ -1,0 +1,15 @@
+load crypto/ecc.ko
+load crypto/ecdh_generic.ko
+load net/bluetooth/bluetooth.ko
+load drivers/bluetooth/hci_vhci.ko
+
+load btintel.ko
+load hci_vhci.ko
+
+
+create vhci device -> open file descriptor to hci_vhci -> register vhci::vhci_write_callback (as send_handler in btdev) and register vhci::vhci_read_callback (as mainloop callback)
+
+(receive and response path)
+mainloop_run -> epoll_wait (causes hci_vhci's vhci_poll to be called) -> vhci::vhci_read_callback -> btdev::btdev_receive_h4 -> btdev::send_packet -> vhci::vhci_write_callback(send_handler) -> \
+writev -> vhci_write -> vhci_get_user -> hci_recv_frame (or create device for HCI_VENDOR_PKT)
+
