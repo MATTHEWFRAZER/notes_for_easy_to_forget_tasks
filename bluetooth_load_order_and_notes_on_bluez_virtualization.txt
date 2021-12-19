@@ -13,3 +13,48 @@ create vhci device -> open file descriptor to hci_vhci -> register vhci::vhci_wr
 mainloop_run -> epoll_wait (causes hci_vhci's vhci_poll to be called) -> vhci::vhci_read_callback -> btdev::btdev_receive_h4 -> btdev::send_packet -> vhci::vhci_write_callback(send_handler) -> \
 writev -> vhci_write -> vhci_get_user -> hci_recv_frame (or create device for HCI_VENDOR_PKT)
 
+
+AFH - adaptive frequency hopping (made so that interference is reduced; when a link is formed the devices
+      are synchronized to change channels together many times a second. The pattern is called a hop 
+	  sequence and is unique for each link)
+	  
+ISO - isochronous channels (isoc). Allows the ability to synchronize time-sensitive data streams across
+	  multiple receivers. Supports connection oriented and broadcast. 
+	  
+ACL - asynchronous connection-less, for general frame. Two frame types: DH (which doesn't provide FEC, Forward Error Connection) and DM which does provide FEC
+	  For DH and DM, a number is appended to these frame types to indicate how many 625 usec. "slot" will be occupied. ACL is multipoint connection between 
+	  one master and many slaves
+
+SCO - synchronous connection oriented for synchronous audio frame. For realtime/voice/video. fixed bandwidth channels and can have max of 3 channels per device
+	  SCO is point to point connection between only one master and only one slave
+
+BLE - Bluetooth Low Energy
+	  
+GATT - for BLE, an acronym for Generic Attribute Profile. Defines the way two BLE devices transfer data back and
+	   forth using concepts called Services and Characteristics. Makes use of a generic protocal called the Attribute
+	   protocol (ATT), which is used to store services, characteristics and related data in a simple lookup table
+	   using 16 bit ids for each entry. GATT comes into play once a dedicated connection is established. The most important
+	   thing with GATT and connectiosn is that connections are exclusive
+
+BLE vs Bluetooth - BLE is developed to take care of sending small chunks of data (Iot). bluetooth is used for network requiring
+				   data exchange as well as wireless headset and other consumer devices. BLE operates in the same band as standard
+				   bluetooth but uses different FHSS scheme. BLE devices are not compatible with bluetooth devices and will not interoperate
+				   
+BR/EDR - Bluetooth basic rate/Enhanced data rate. BLE modules target applications that require both BLE and classic connectivity. This means classic and BLE are both supported
+
+SSP - Secure Simple Pairing fixes issues of the original pairing method. The process of pairing in general is aimed at creating a shared secret called a Link Key
+      This Link Key authenticates paired devices to each other. Uses Diffie-Hellman key 
+
+LMP - Link Management Protocol. Used for control of the radio link between two devices, highe, dmv, querying device abilities and power control. Implemented on the controller
+
+AMP - alternate MAC/PHY. Enables the use of alternative MAC and PHY's for transporting Bluetooth profile data. The Bluetooth radio is still used for device discovery, initial
+      connection and profile configuration. However, when large quantaties of data must be sent, the high-speed alternative MAC PHY 802.11 (typically associated with WIFI)
+	  transports the data. THis means that Bluetooth uses proven low power connection models when the system is idle, and the faster radio when it must send large quantities
+	  of data. AMP links require enhanced L2CAP modes.
+	  
+HCI - Standardized communication between host stack (e.g., a PC or mobile phone OS) and the controller (the Bluetooth integrated circuit (IC)). This standard allows the host stack
+      or controller IC to be swapped with minimal adaption. There are several HCI transport standards, each using a different hardware interface to transfer the same command,
+	  event and data packets. The most commonly used are (USB in PCs) and UART (in mobile phones and PDAs). In Bluetooth devices with simple functionality (e.g. headsets),
+	  the host stack and controller can be implemented on the same microprocessor. In this case the HCI is optional, although often implemented as an internal software interface
+
+SMP - Security Manager Protocol is used for establishing pairing, authentication and encryption between Bluetooth LE devices
