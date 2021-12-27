@@ -5,3 +5,10 @@ bluez install
 3. autoreconf --install
 4. ./configure
 5. make
+
+from youtube:
+https://www.youtube.com/watch?v=hEZvNiQBuX8
+1. change system directories in bootstrap-configure (--prefix, and --sysconfdir) so install doesn't ruin system until you're ready.  
+2. ./bootstrap-configure (make sure all dependencies are in place)
+3. sudo apt install libell-dev
+4. (still had issues with ell dependency, but can build emulator) emulator/btvirt
