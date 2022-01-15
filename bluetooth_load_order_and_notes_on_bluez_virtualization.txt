@@ -58,3 +58,19 @@ HCI - Standardized communication between host stack (e.g., a PC or mobile phone 
 	  the host stack and controller can be implemented on the same microprocessor. In this case the HCI is optional, although often implemented as an internal software interface
 
 SMP - Security Manager Protocol is used for establishing pairing, authentication and encryption between Bluetooth LE devices
+
+some notes on kernel:
+cmd comes from hci layer -> gets pushed up to userland (btdev dfault handler) -> the 
+correct handler is found based on op code -> work is done and an event command status is
+sent to hci -> the handler in the hci layer is found and handles the event
+
+example:
+userland app issues hci inquiry (remote_device.c) -> hci socket gets ioctl (hci_sock.c) and issues an async request (hci_core.c) -> 
+in the request a command (hci_req_add_ev, hci_request) by run_req (hci_request.c) -> queues command cmd_work (hci_core.c) -> \
+hci driver gets skb (hci_vhci.c) -> pushes to userland btdev (btdev.c) -> btdev picks hci inquiry command handler -> in command handler
+a command status is sent back to the hci layer (btdev.c) -> hci layer will be waiting for HCI_INQUIRY bit to be cleared
+-> btdev will complete the command in a separate event callback (btdev.c, cmd_inquiry_complete) ->
+btdev sends BT_HCI_EVT_INQUIRY_RESULT event back to hci layer (btdev.c, inquiry_callback) -> hci layer recieves
+inquiry result event and fills in the result in kernel (hci_event.c, hci_inquiry_result_evt -> btdev then
+sends BT_HCI_EVT_INQUIRY_COMPLETE event to hci layer (btdev.c, inquiry_callback) -> hci layer receives
+event and clears HCI_INQUIRY bit and wakes up inquiry routine in hci_core (hci_event.c, hci_inquiry_complete_evt)
