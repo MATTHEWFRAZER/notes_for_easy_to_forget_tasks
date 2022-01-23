@@ -1,0 +1,60 @@
+﻿First, you will need to install Vundle. Run the following:
+$ git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
+
+Next, copy and paste the following at the top of ~/.vimrc file:
+set nocompatible              " be iMproved, required
+filetype off                  " required
+
+" set the runtime path to include Vundle and initialize
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+" alternatively, pass a path where Vundle should install plugins
+"call vundle#begin('~/some/path/here')
+
+" let Vundle manage Vundle, required
+Plugin 'VundleVim/Vundle.vim'
+Plugin 'Valloric/YouCompleteMe'
+
+" All of your Plugins must be added before the following line
+call vundle#end()            " required
+filetype plugin indent on    " required
+" To ignore plugin indent changes, instead use:
+"filetype plugin on
+"
+" Brief help
+" :PluginList       - lists configured plugins
+" :PluginInstall    - installs plugins; append `!` to update or just :PluginUpdate
+" :PluginSearch foo - searches for foo; append `!` to refresh local cache
+" :PluginClean      - confirms removal of unused plugins; append `!` to auto-approve removal
+"
+" see :h vundle for more details or wiki for FAQ
+" Put your non-Plugin stuff after this line
+
+
+Next, install Vundle and YouCompleteMe in vim. To do this, open up vim and install plugins:
+$ vim
+:PluginInstall
+
+This command within vim will install Vundle and YouCompleteMe plugins directly from the Github repositories, so make sure that you have Internet connection. Wait until it says "Done" at the bottom of vim.
+
+You are not done yet. You will need to install necessary packages to configure YouCompleteMe.
+$ sudo apt-get install build-essential cmake python-dev python3-dev
+
+Next, you will need to change directory to where the YouCompleteMe is installed and setup clang-completion for C-family:
+$ cd ~/.vim/bundle/YouCompleteMe
+$ ./install.py --clang-completer
+
+This will take a while, so be patient. When this is done, you are done with the installation, but you are not done with C-family auto-completion features just yet. For more info, you will need to read the official documentation regarding the part.
+
+Basically, you will need to let clang know how to compile your project, so that it can suggest auto-completion methods or fields. If your simply want to skip all and see it in action, then create ~/.vim/bundle/YouCompleteMe/.ycm_extra_conf.py with the following:
+def FlagsForFile( filename, **kwargs ):
+  return {
+    'flags': [ '-x', 'c++', '-Wall', '-Wextra', '-Werror' ],
+  }
+
+Also, append the following line to ~/.vimrc
+let g:ycm_global_ycm_extra_conf = '~/.vim/bundle/YouCompleteMe/.ycm_extra_conf.py'
+
+Now, start editing a C++ file in the same directory with vim
+$ vim hello.cpp
+source: https://unixnme.blogspot.com/2017/03/how-to-install-youcompleteme-vim-plugin.html
