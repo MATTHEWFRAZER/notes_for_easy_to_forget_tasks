@@ -5,6 +5,9 @@ bluez install
 3. autoreconf --install
 4. ./configure
 5. make
+6. to build btvirt -> uncomment input/dependencies -> make emulator/btvirt
+
+
 
 from youtube:
 https://www.youtube.com/watch?v=hEZvNiQBuX8

@@ -74,3 +74,38 @@ btdev sends BT_HCI_EVT_INQUIRY_RESULT event back to hci layer (btdev.c, inquiry_
 inquiry result event and fills in the result in kernel (hci_event.c, hci_inquiry_result_evt -> btdev then
 sends BT_HCI_EVT_INQUIRY_COMPLETE event to hci layer (btdev.c, inquiry_callback) -> hci layer receives
 event and clears HCI_INQUIRY bit and wakes up inquiry routine in hci_core (hci_event.c, hci_inquiry_complete_evt)
+
+
+cmd_register_notify
+tools/gatt-client.c (cmd_register_notify , this function is registered with mainloop -> registers notify_cb and register_notify_cb though) -> shared/gatt-client.c (bt_gatt_client_register_notify 
+-> register_notify) -> shared/gatt-client.c (attaches new notify_data to notify_list) -> shared/gatt-client.c (through notify_cb which is triggered by gatt_client_new registration to bt_att through 
+bt_att_register with (BT_ATT_OP_HANDLE_NFY, BT_ATT_OP_HANDLE_NFY_MULT, BT_ATT_OP_HANDLE_IND) and shared/gatt-client.c/notify_cb which calls the notify_handler which calls tools/gatt-client.c/notify_cb for every 
+registered notification) -> shared/att.c (bt_att_register creates new att_notify which takes callback shared/gatt-client.c/notify_cb) -> notify_list can be triggered in shared/att.c 
+bt_att_new -> bt_att_chan_new -> can_read_data (registered with shared/io-ell.c/io_set_read_handler) -> handle_notify (calls shared/gatt-client.c/notify_cb for every registered notification), bt_att_attach_fd -> bt_att_chan_new can_read_data (registered with 
+shared/io-ell.c/io_set_read_handler) -> handle_notify (calls shared/gatt-client.c/notify_cb for every registered notification)
+
+cmd_write_prepare
+tools/gatt-client.c (cmd_write_prepare, this function is registered with mainloop) -> shared/gatt-client.c (bt_gatt_client_prepare_write, gets reliable request through get_reliable_request and registers
+tools/gatt-client.c write_long_cb to it) -> shared/att.c (bt_att_send with BT_ATT_OP_PREP_WRITE_REQ) ...
+
+cmd_write_execute
+tools/gatt-client.c (cmd_write_execute, this function is registered with mainloop) -> shared/gatt-client.c (bt_gatt_client_write_execute with BT_ATT_OP_EXEC_WRITE_REQ) -> 
+shared/att.c (bt_att_send, pushes op allocated in shared/gatt-client.c to write_queue, ) -> wakeup_writer (calls wakeup_chan_writer on every channel in chans) ->
+shared/att.c (can_write_data) -> shared/att.c (bt_att_chan_write) -> shared/io-ell.c (io_send) -> writev to open channel
+gives back att_id (an incremented counter of next op) to the prepared request in pending_requests of the client and returns original reliable_session_id to tools/gatt-client.c or 0 if fail)
+
+cmd_set_security
+tools/gatt-client.c (cmd_set_security, ...) -> shared/gatt-client.c (bt_gatt_client_set_security called with level) -> shared/att.c (bt_att_set_security, finds tail channel and passes that down 
+-> bt_att_chan_set_security ->  setsockopt(chan->fd, SOL_BLUETOOTH, BT_SECURITY, &sec,sizeof(sec)) which uses passed in level to set security of socket handle))
+
+cmd_read_value
+tools/gatt-client.c (cmd_read_value, ... , calls bt_gatt_client_read_value with handle for value and a callback tools/gatt-client.c/read_cb) -> shared/gatt-client.c 
+(bt_gatt_client_read_value, makes an op and makes a request through request_create and associates op with request) -> shared/att.c 
+(bt_att_send called with BT_ATT_OP_READ_REQ and shared/gatt-client.c/read_cb, makes op (through create_att_send_op) with associated with shared/gatt-client.c/read_cb to add to att->req_queue,
+wakeup_writer is called) -> wakeup_writer (calls wakeup_chan_writer on every channel in chans) -> shared/att.c (can_write_data, pends op with chan->pending_req since it is a request) -> 
+shared/att.c (bt_att_chan_write) -> shared/io-ell.c (io_send) -> writev to open channel
+gives back att_id (an incremented counter of next op) to the prepared request in pending_requests of the client and returns original reliable_session_id to tools/gatt-client.c or 0 if fail)
+
+later:
+shared/gatt-client.c (can_read_data is called with chan->pending_req, can_read_data was registerd with ell-io.c when a new channel was allocated) -> shared/gatt-client.c 
+(handle_rsp, call op->callback (shared/gatt-client.c/read_cb) and calls wakeup_chan_writer)
