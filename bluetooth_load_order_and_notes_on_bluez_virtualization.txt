@@ -109,3 +109,11 @@ gives back att_id (an incremented counter of next op) to the prepared request in
 later:
 shared/gatt-client.c (can_read_data is called with chan->pending_req, can_read_data was registerd with ell-io.c when a new channel was allocated) -> shared/gatt-client.c 
 (handle_rsp, call op->callback (shared/gatt-client.c/read_cb) and calls wakeup_chan_writer)
+
+
+what is a profile?
+https://blog.mrgibbs.io/bluetooth-profile-with-bluez-mono/
+Once you have paired your bluetooth device with BlueZ, the next step depends on what type of device it is.
+
+One of the most common bluetooth profiles is the Serial port profile. I could write quite a lengthy article about RFCOMM, L2CAPP, SDP, and various other bluetooth protocols and profiles, but 
+the reality is that BlueZ5 does quite a nice job of abstracting these details so that you really don't need to be concerned with them for most use cases.
