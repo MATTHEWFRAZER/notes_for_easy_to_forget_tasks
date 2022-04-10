@@ -118,7 +118,11 @@ Once you have paired your bluetooth device with BlueZ, the next step depends on 
 One of the most common bluetooth profiles is the Serial port profile. I could write quite a lengthy article about RFCOMM, L2CAPP, SDP, and various other bluetooth protocols and profiles, but 
 the reality is that BlueZ5 does quite a nice job of abstracting these details so that you really don't need to be concerned with them for most use cases.
 
+- ProfileManger1 is implemented in src/profile.c
+
 what is an agent?
 - an interface that deals with authentication
 from the docs: It is not required by an application to register an agent. If an application does chooses to not register an agent, the default agent is used. This is on most cases a good idea. 
 Only application like a pairing wizard should register their own agent.
+
+- AgentManager1 is implemented in src/agent.c
