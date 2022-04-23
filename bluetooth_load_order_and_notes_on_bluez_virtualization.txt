@@ -126,3 +126,16 @@ from the docs: It is not required by an application to register an agent. If an 
 Only application like a pairing wizard should register their own agent.
 
 - AgentManager1 is implemented in src/agent.c
+
+- for server side, we implement an object manager as an application, then on the target stack we have built our application on (e.g. Gatt or Media, etc) we call that adapater's
+(e.g. GatManager or MediaManager) interface with RegisterApp. see bluez/test/example-gatt-server, bluez/src/gatt-database.c, or bluez/profiles/audio/media.c)
+
+- in gatt-database.c we register an app through the dbus call to RegisterApp, in which we call (create_app.c in src/gatt-database.c), this sets up the app to be added to the gatt db and 
+  for a its constituent services and characteristics to be lazily resolved (see g_dbus_client_set_ready_watch called in create_app in src/gatt-database.c), the callback passed to
+  g_dbus_client_set_ready_watch (defined in gdbus/watch.c) (also see client_ready_cb in src/gatt-database.c) will be called after the app's getmanaged objects result is parsed and passed into 
+  the given callback (see manager_register_app -> create_app -> sets up client_ready_cb registered as a callback in g_dbus_client_set_ready_watch (defined in gdbus/watch.c) also g_dbus_client_new_full
+  which setups up service_connect as a g_dbus_add_service_watch also which will be called on service connect -> service_connect will eventually get called as a filter callback (see gdbus/watch.c) -> 
+  get_managed_objects -> sets up get_managed_objects_reply as a pending dbus result callback -> parse_managed_objects_reply  -> client->ready (client_ready_cb from src/gatt-database.c) -> 
+  database_add_app (see src/gatt-database.c, operating on the results of parse_managed_objects_reply) -> database_add_service (see src/gatt-database.c, operating on the results 
+  of parse_managed_objects_reply) -> database_add_characteristic (see src/gatt-database.c, operating on the results of parse_managed_objects_reply) all defined in gdbus/client.c unless 
+  otherwise noted (see database_add_app in src/gatt-database.c)
