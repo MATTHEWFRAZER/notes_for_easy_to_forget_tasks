@@ -131,7 +131,7 @@ Only application like a pairing wizard should register their own agent.
 (e.g. GatManager or MediaManager) interface with RegisterApp. see bluez/test/example-gatt-server, bluez/src/gatt-database.c, or bluez/profiles/audio/media.c)
 
 - in gatt-database.c we register an app through the dbus call to RegisterApp, in which we call (create_app.c in src/gatt-database.c), this sets up the app to be added to the gatt db and 
-  for a its constituent services and characteristics to be lazily resolved (see g_dbus_client_set_ready_watch called in create_app in src/gatt-database.c), the callback passed to
+  for a its constituent services and characteristics to be lazily resolved (see g_dbus_client_set_ready_watch called in create_app in src/gatt-database.c), the callback passsed to
   g_dbus_client_set_ready_watch (defined in gdbus/watch.c) (also see client_ready_cb in src/gatt-database.c) will be called after the app's getmanaged objects result is parsed and passed into 
   the given callback (see manager_register_app -> create_app -> sets up client_ready_cb registered as a callback in g_dbus_client_set_ready_watch (defined in gdbus/watch.c) also g_dbus_client_new_full
   which setups up service_connect as a g_dbus_add_service_watch also which will be called on service connect -> service_connect will eventually get called as a filter callback (see gdbus/watch.c) -> 
@@ -139,3 +139,23 @@ Only application like a pairing wizard should register their own agent.
   database_add_app (see src/gatt-database.c, operating on the results of parse_managed_objects_reply) -> database_add_service (see src/gatt-database.c, operating on the results 
   of parse_managed_objects_reply) -> database_add_characteristic (see src/gatt-database.c, operating on the results of parse_managed_objects_reply) all defined in gdbus/client.c unless 
   otherwise noted (see database_add_app in src/gatt-database.c)
+  
+  - connection:
+     1. main -> sets connect_handler using g_dbus_client_set_connect (see client/main.c for example)
+	 2. manager_register_app is triggered -> create_app -> g_dbus_client_new_full -> sets service watch with service_connect using g_dbus_add_service_watch (see gdbus/client.c)
+	 3. service_connect calls client->connect_func (connect_func is what was set with g_dbus_client_set_connect_watch in client/main.c) -> also sets client->connected = TRUE
+	    -> 1. g_dbus_add_service_watch -> set service_filter in filter_data_get (find tilter data, if none exists, allocate one and add to listeners see gdbus/watch.c) -> 
+		      on NameOwnerChanged modified for service message_filter -> service_filter calls conn_func set in filter_data_add_callback (see gdbus/watch.c)
+		   2. find set connect to filter_data_add_callback (see gdbus/watch.c)
+		   3. note in filter_data_get (see gdbus/watch.c) we register message_filter if we don't find data associated with the connection from filter_data_find (message filter will call handle_func which
+		      which is setup in g_dbus_add_service_watch as service_filter. service filter is called in message filter ...
+	 4. service_filter (gdbus/watch.c) -> callback that is set in g_dbus_add_service_watch is called (service_connect from gdbus/client.c)
+	
+  
+  - connection add filter: 
+    1. main calls g_dbus_client_set_signal_watch to set client->signal
+	2. manager_register_app -> create_app -> g_dbus_client_new_full -> pass message_filter to dbus_connection_add_filter (see gdbus/client.c) -> in message_filter
+       call signal_func (signal function set by g_dbus_client_set_signal_watch)(see gdbus/client.c)
+  
+  - device:
+    - gatt_db per device
