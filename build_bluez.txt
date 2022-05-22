@@ -15,3 +15,8 @@ https://www.youtube.com/watch?v=hEZvNiQBuX8
 2. ./bootstrap-configure (make sure all dependencies are in place)
 3. sudo apt install libell-dev
 4. (still had issues with ell dependency, but can build emulator) emulator/btvirt
+
+after coming back and doing it again:
+uncomment the following lines and you should be able to just make emulator/btvirt:
+1. emulator_btvirt_SOURCES (if it isn't already uncommented)
+2. am_emulator_btvirt_OBJECTS (emulator_btvirt_OBJECTS is defined using this)
