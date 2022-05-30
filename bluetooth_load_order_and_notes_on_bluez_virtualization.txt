@@ -159,3 +159,17 @@ Only application like a pairing wizard should register their own agent.
   
   - device:
     - gatt_db per device
+	
+	
+  - adapter:
+    devices added to found devices
+	main (see) will call adapter_init registers read_version_complete -> index_added registers read_info_complete registers device_found_callback
+	   -> update_found_devices -> update_found_devices will place device in adapter->discovery_found if device is discoverable and passes filters and if in discovery
+	   (see src/adapter.c)
+	   
+	trigger discovery
+	client (some application that wants to communicate/use adapter calls StartDiscovery via dbus) -> appends client to discovery_list (those clients that are in discovery
+	-> trigger new scan if filters have changed
+    
+    1. client (some application that wants to communicate/use adapter calls StartDiscovery via dbus)
+	2. interfaces_added will find the appropriate proxy or make one and then
