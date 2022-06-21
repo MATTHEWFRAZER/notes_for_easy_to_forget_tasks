@@ -59,6 +59,15 @@ HCI - Standardized communication between host stack (e.g., a PC or mobile phone 
 
 SMP - Security Manager Protocol is used for establishing pairing, authentication and encryption between Bluetooth LE devices
 
+SDP - Service Discovery Protocl (BR/EDR only), used to find remote services
+
+GATT (Generic Attribute) Profile - used to find remote services in BLE (now Bluetooth Smart)
+
+SDP vs GATT (Generic Attribute) Profile - Since GATT puts all service details on ATT, there is no need for a separate service
+                                          discovery protocol (SDP), like we have in BR/EDR. The ATT protocol is used for 
+										  everything: discovering services, finding services' characteristics, reading/writing
+										  values, and so on
+
 some notes on kernel:
 cmd comes from hci layer -> gets pushed up to userland (btdev dfault handler) -> the 
 correct handler is found based on op code -> work is done and an event command status is
