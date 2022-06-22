@@ -182,3 +182,9 @@ Only application like a pairing wizard should register their own agent.
     
     1. client (some application that wants to communicate/use adapter calls StartDiscovery via dbus)
 	2. interfaces_added will find the appropriate proxy or make one and then
+	
+	
+	Note: mgmt makes an hci socket and that is what it wraps in its glib io wrapper
+    call heirarchy for how mgmt handles notification for device found	
+	io_set_read_handler (shared/io-glib.c) has callback set to can_read_data (shared/mgmt.c) which will eventually be called -> process_notify (shared/mgmt.c) -> notify_handler (shared/mgmt.c) 
+	-> device_found_callback (adapter.c)
