@@ -13,6 +13,13 @@ create vhci device -> open file descriptor to hci_vhci -> register vhci::vhci_wr
 mainloop_run -> epoll_wait (causes hci_vhci's vhci_poll to be called) -> vhci::vhci_read_callback -> btdev::btdev_receive_h4 -> btdev::send_packet -> vhci::vhci_write_callback(send_handler) -> \
 writev -> vhci_write -> vhci_get_user -> hci_recv_frame (or create device for HCI_VENDOR_PKT)
 
+(hci -> application)
+hci_vhci::hdev->send -> hci_vhci::vhci_send_frame -> skb_queue_tail(&data->readq, skb) -> asynchronous -> hci_vhci::vhci_read -> skb = skb_dequeue(&data->readq) -> \
+ret = vhci_put_user(data, skb, buf, count)
+
+(application -> hci)
+hci_vhci::vhci_get_user -> hci_vhci::hci_recv_frame
+
 
 AFH - adaptive frequency hopping (made so that interference is reduced; when a link is formed the devices
       are synchronized to change channels together many times a second. The pattern is called a hop 
@@ -67,6 +74,12 @@ SDP vs GATT (Generic Attribute) Profile - Since GATT puts all service details on
                                           discovery protocol (SDP), like we have in BR/EDR. The ATT protocol is used for 
 										  everything: discovering services, finding services' characteristics, reading/writing
 										  values, and so on
+										  
+BNEP (Bluetooth Network Encapsulation Protocol) - used for delivering packets on top of L2CAP in a PAN (built ontop of L@CAP)
+
+PAN (Personal Area Network) - a computer network for interconnecting electronic devices within an individual's workspace	
+
+RFCOMM (Radio Frequency Communication) - simple set of transport protocols, serial port emulation (built on top of L2CAP)
 
 some notes on kernel:
 cmd comes from hci layer -> gets pushed up to userland (btdev dfault handler) -> the 
@@ -188,3 +201,66 @@ Only application like a pairing wizard should register their own agent.
     call heirarchy for how mgmt handles notification for device found	
 	io_set_read_handler (shared/io-glib.c) has callback set to can_read_data (shared/mgmt.c) which will eventually be called -> process_notify (shared/mgmt.c) -> notify_handler (shared/mgmt.c) 
 	-> device_found_callback (adapter.c)
+	
+
+seeing how direct link works (acl):	
+see chan->data_q, we queue an skb in l2cap_send_cmd (in l2cap_core.c) and dequeue in hci_tx_work -> hci_sched_acl -> hci_sched_acl_pkt or hci_sched_sco then hci_send_frame -> \
+hdev->send in hci_core.c
+
+WANT TO SEE WHERE does receive_queue get populated from lower layer (see bnep? bnep proto filter? really see rfcomm)
+want to see, send from application:
+RFCOMM:
+https://www.amd.e-technik.uni-rostock.de/ma/gol/lectures/wirlec/bluetooth_info/rfcomm.html
+https://people.csail.mit.edu/albert/bluez-intro/x502.html
+
+DLC : Data Link Connection
+DLCI: Data Link Connection Identifier
+
+kernel -> l2cap -> rfcomm
+
+dlc allocation:
+dlc is allocated rfcomm_dlc_alloc in rfcomm_sock_alloc (d->owner is allocated socket) (rfcomm/sock.c) and dlc data_ready is set to sk_data_ready (rfcomm/sock.c)
+
+dlc is associated between l2cap and rfcomm layer
+rfcomm_sock_connect (rfcomm/socket.c) -> rfcomm_dlc_open (rfcomm/core.c) -> rfcomm_dlc_link (rfcomm/core.c)
+
+
+connect ind
+rfcomm_sock_alloc links socket (rfcomm/sock.c) -> rfcomm_connect_ind (rfcomm/sock.c) -> rfcomm_get_sock_by_channel gets parent from rfcomm_sk_list and sets it as the given socket's parent (3)-> calls bt_accept_enqueue 
+
+l2cap_sock_ready_cb -> gets parent from channel socket and calls sk_data_ready
+
+from l2cap layer: 
+l2cap_sock_recv_cb (l2cap_sock.c) -> l2cap_sock_ready_cb (l2cap_sock.c) -> rfcomm_l2data_ready (rfcomm/core.c) (set up in rfcomm_l2sock_create, which calls sock_create_kern rfcomm/core.c) -> rfcomm_schedule (rfcomm/core.c)  -> wake_up_all(rfcomm_wq) (rfcomm/core.c) (1)
+
+rfcomm core (into rfcomm, rfcomm/core.c):
+rfcomm_init -> kthread_run -> rfcomm_run -> 1 -> rfcomm_process_sesssions (session is l2cap sock and maintained as a list in rfcomm/core.c, rfcomm_l2sock_create) 
+-> rfcomm_process_rx (sk is the receieve queue of the session socket) -> rfcomm_recv_frame -> rfcomm_recv_data -> (here dlc data ready gets called) d->data_ready -> rfcomm_sk_data_ready, this will call the rfcomm dlc "owner" socket's sk_data_ready callbacks (rfcomm/sock.c) -> 
+skb_queue_tail(sk->sk_receive_queue) (sk is dlc socket rfcomm_sock_alloc and rfcomm_sock_create in rfcomm/sock.c) (2)
+
+tty layer: 
+2 -> skb_dequeue(receive_queue) -> skb_queue_tail(dev->pending) -> (tty.c)
+
+BNEP
+1. message is sent to remote device
+userland sendmsg -> hci_sock.c::hci_sock_sendmsg
+2. message is processed by socket layer
+add to either raw_q or cmd_q of hdev
+3. hci layer picks up message
+hci_cmd_work is pulled off workqueue -> hci_send_frame (both hci_core.c)
+4. socket layer transmitts message
+hci_send_to_sock (hci_sock.c) -> puts it on socket receive_queue (sock_queue_rcv_queue, net/core/sock.c)
+
+want to see, receive from application:
+1. message is received by network layer
+2. message is processed by socket layer
+3. hci layer picks up message
+4. device handles message
+
+want to see:
+
+
+what is a connection and what is a channel?
+
+
+HCI implements baseband protocol, l2cap data link layer, rfcomm emulation layer

@@ -1,0 +1,4 @@
+ctags:
+^] = jump to definition
+^t = jump back from definition
+g] = show all things that use the name
