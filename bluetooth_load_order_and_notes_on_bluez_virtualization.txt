@@ -264,3 +264,7 @@ what is a connection and what is a channel?
 
 
 HCI implements baseband protocol, l2cap data link layer, rfcomm emulation layer
+
+*an hdev has a send function pointer:
+send: send to the hardware
+receive: there is no function pointer and receive is from hardware into hci layer (hci_recv_frame, hci_core.c)
