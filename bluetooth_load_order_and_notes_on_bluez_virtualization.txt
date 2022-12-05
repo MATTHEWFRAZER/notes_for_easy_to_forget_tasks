@@ -221,8 +221,10 @@ kernel -> l2cap -> rfcomm
 dlc allocation:
 dlc is allocated rfcomm_dlc_alloc in rfcomm_sock_alloc (d->owner is allocated socket) (rfcomm/sock.c) and dlc data_ready is set to sk_data_ready (rfcomm/sock.c)
 
-dlc is associated between l2cap and rfcomm layer
+dlc is linked
 rfcomm_sock_connect (rfcomm/socket.c) -> rfcomm_dlc_open (rfcomm/core.c) -> rfcomm_dlc_link (rfcomm/core.c)
+
+RFCOMM users L2CAP sockets (rfcomm_l2sock_create, rfcomm/core.c)
 
 
 connect ind
