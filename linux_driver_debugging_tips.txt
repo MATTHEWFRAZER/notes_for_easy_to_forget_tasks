@@ -90,3 +90,11 @@ gdb set break point somewhere
 
 info functions
 ###### MORE END
+
+configure frame pointer:
+It is advised, but not required, that you turn on the CONFIG_FRAME_POINTER kernel option which is called Compile the kernel with frame pointers in 
+the config menu. This option inserts code to into the compiled executable which saves the frame information in registers or on the stack at different 
+points which allows a debugger such as gdb to more accurately construct stack back traces while debugging the kernel.
+
+https://www.kernel.org/doc/html/v4.14/dev-tools/kgdb.html
+https://www.starlab.io/blog/using-gdb-to-debug-the-linux-kernel
