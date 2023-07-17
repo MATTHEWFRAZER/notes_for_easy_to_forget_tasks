@@ -61,3 +61,31 @@ fltkd.volume <address> -> lists information on volume
 
 execute on break:
 bp MyDriver!SymbolOrWhatever "dv /b myVarAddress; g"
+
+MANUAL STACK WALK (https://www.youtube.com/watch?v=1qeD9kFDV7s):
+first try k=<address of highest stack frame before corruption> (bottom of stack will be null and we have succeeded in walking the non-corrupted part of the stack)
+
+!teb
+
+.logopen /t <path to log file to write to>
+
+dds <address of stack limit> (for 64 bit ddq)
+
+.logclose
+
+we will be looking for return addresses (use notepad++ to highlight same addresses)
+use ln to find nearest symbol to return addresses
+
+INSPECT USER MODE:
+0: kd> .process /i 863c22f0  
+You need to continue execution (press 'g' ) for the context
+to be switched. When the debugger breaks in again, you will be in
+the new process context.
+
+0: kd> g
+Break instruction exception - code 80000003 (first chance)
+nt!RtlpBreakWithStatusInstruction:
+8052b5dc int     3
+
+1: kd> .reload /user
+Loading User Symbols
