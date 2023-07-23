@@ -89,3 +89,11 @@ nt!RtlpBreakWithStatusInstruction:
 
 1: kd> .reload /user
 Loading User Symbols
+
+PyExt:
+https://github.com/SeanCline/PyExt/releases
+Unzip pyext.dll into WinDbg's winext directory. (Make sure to use the x86 or x64 version that corresponds to the build of WinDbg you're using.)
+Open a dump file in WinDbg and load the extension with: .load pyext
+Add the Python symbol server to the symbol path with: .sympath+ srv*c:\symbols*http://pythonsymbols.sdcline.com/symbols/
+Use !pystack to see the Python backtrace at the time the dump was captured.
+!pyobj

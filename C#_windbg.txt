@@ -1,0 +1,291 @@
+https://www.youtube.com/watch?v=BaFquQ9YZYU
+https://twitter.com/badamczewski01/status/1314858587471130625
+https://www.sysadmins.lv/retired-msft-blogs/alejacma/sos-cheat-sheet-net-203035.aspx
+
+c# to assembly and assembly:
+https://sharplab.io/
+
+sosex:
+http://www.stevestechspot.com/default.aspx#ae5bbe6da-694d-4dfe-b1a4-8d6e0600a7ca
+
+mex:
+https://learn.microsoft.com/en-us/archive/blogs/luisdem/mex-debugging-extension-for-windbg-2
+
+.net stack video:
+https://www.youtube.com/watch?v=yUylHDRL218
+
+.cordll -ve -u -l (need this for .net debugging)
+
+.load sos
+.loadby sos clr (maybe also .loadby sos mscorwks;.loadby sos clr)
+.load sosex
+
+!sos.ClrStack
+!sos.ClrStack -p
+!clrstack -l -p (locals and parameters)
+
+!gcroot <address of managed object> (tells you how one object is being referenced by other objects and whether the object is alive
+         and referenced by the garbage collector)
+
+!mdt <address of managed object> (managed data type, dumps managed object)
+
+!dso (dump stack objects)
+
+!dumpheap -type <name of class object>
+
+get il:
+!dumpmodule -mt <method table address from name2ee module>
+!dumpMt -md <method table address from dump module>
+!dumpil <method descriptor address from dumpmt>
+
+annotated example:
+// get Practice.dll module address
+0:000> !name2ee * Practice
+Module:      00007ffc16774000
+Assembly:    System.Private.CoreLib.dll
+--------------------------------------
+Module:      00007ffc169668f0
+Assembly:    Practice.dll
+--------------------------------------
+Module:      00007ffc16968478
+Assembly:    System.Runtime.dll
+--------------------------------------
+Module:      00007ffc16974000
+Assembly:    System.Collections.dll
+--------------------------------------
+Module:      00007ffc1697a060
+Assembly:    System.Console.dll
+
+// dump the module's method table using the above module address
+0:000> !dumpmodule -mt 00007ffc169668f0
+Name: C:\Users\mfraz\source\repos\Practice\Practice\bin\Debug\net6.0\Practice.dll
+Attributes:              PEFile 
+TransientFlags:          00209011 
+Assembly:                00000230debe5720
+BaseAddress:             00000230E0400000
+PEFile:                  00000230DEBE57C0
+ModuleId:                00007FFC16966DF0
+ModuleIndex:             0000000000000001
+LoaderHeap:              0000000000000000
+TypeDefToMethodTableMap: 00007FFC16952210
+TypeRefToMethodTableMap: 00007FFC16952320
+MethodDefToDescMap:      00007FFC16952488
+FieldDefToDescMap:       00007FFC16952738
+MemberRefToDescMap:      0000000000000000
+FileReferencesMap:       00007FFC16952918
+AssemblyReferencesMap:   00007FFC16952920
+MetaData start address:  00000230E0406EB4 (13396 bytes)
+
+Types defined in this module
+
+              MT          TypeDef Name
+------------------------------------------------------------------------------
+00007ffc16968980 0x02000005 Program
+00007ffc16975198 0x02000006 Methods
+00007ffc16975320 0x02000007 
+00007ffc169738b0 0x02000008 Methods+Node`1
+00007ffc16973d40 0x0200001a Methods+Job
+00007ffc16976fd8 0x0200001c Methods+PotsOfGoldAgg
+00007ffc16975230 0x0200001f +__StaticArrayInitTypeSize=32
+00007ffc169752a8 0x02000020 +__StaticArrayInitTypeSize=40
+
+Types referenced in this module
+
+              MT            TypeRef Name
+------------------------------------------------------------------------------
+00007ffc16885678 0x02000010 System.Object
+00007ffc1693b6b0 0x02000011 System.Collections.Generic.IList`1
+00007ffc16978330 0x02000012 System.Collections.Generic.HashSet`1
+00007ffc169774e8 0x02000014 System.Collections.Generic.IEnumerator`1
+00007ffc16977a68 0x02000015 System.Runtime.CompilerServices.DefaultInterpolatedStringHandler
+00007ffc1696fb08 0x02000018 System.Collections.Generic.List`1
+00007ffc16977ca0 0x0200001b System.Collections.Generic.ISet`1
+00007ffc168857f0 0x0200001e System.ValueType
+00007ffc1693b3a8 0x02000020 System.Collections.Generic.IEnumerable`1
+00007ffc16939420 0x02000022 System.Runtime.CompilerServices.RuntimeHelpers
+00007ffc16929480 0x02000025 System.Int32
+00007ffc1697b3a8 0x02000026 System.Console
+00007ffc16977448 0x02000027 System.Collections.IEnumerator
+00007ffc16940cc0 0x02000028 System.IDisposable
+00007ffc1693b4c0 0x0200002a System.Collections.Generic.ICollection`1
+
+// dump the method descriptor table using the method table given by Methods
+0:000> !dumpmt -md 00007ffc16975198
+EEClass:         00007ffc16984688
+Module:          00007ffc169668f0
+Name:            Methods
+mdToken:         0000000002000006
+File:            C:\Users\mfraz\source\repos\Practice\Practice\bin\Debug\net6.0\Practice.dll
+BaseSize:        0x18
+ComponentSize:   0x0
+DynamicStatics:  false
+ContainsPointers false
+Slots in VTable: 48
+Number of IFaces in IFaceMap: 0
+--------------------------------------
+MethodDesc Table
+           Entry       MethodDesc    JIT Name
+00007FFC16890030 00007ffc16885608   NONE System.Object.Finalize()
+00007FFC16890038 00007ffc16885618   NONE System.Object.ToString()
+00007FFC16890040 00007ffc16885628   NONE System.Object.Equals(System.Object)
+00007FFC16890058 00007ffc16885668   NONE System.Object.GetHashCode()
+00007FFC168A2570 00007ffc16974d78   NONE Methods.DepthFirstTraversal(Node`1)
+00007FFC168A2578 00007ffc16974d90   NONE Methods.BreadthFirstTraversal(Node`1)
+00007FFC168A2580 00007ffc16974da8   NONE Methods.KMP_naive(System.String, System.String)
+00007FFC168A2588 00007ffc16974dc0   NONE Methods.KnapsackMoreThan1(Int32, System.Collections.Generic.IList`1, System.Collections.Generic.IList`1)
+00007FFC168A2590 00007ffc16974dd8   NONE Methods.SortBoxes(System.Collections.Generic.IList`1)
+00007FFC168A2598 00007ffc16974df0   NONE Methods.Boxes(System.Collections.Generic.IList`1)
+00007FFC168A25A0 00007ffc16974e08   NONE Methods.IsPalindrome(System.String)
+00007FFC168A25A8 00007ffc16974e20   NONE Methods.PalindromeSubsequence(System.String)
+00007FFC168A25B0 00007ffc16974e38   NONE Methods.MaxPalindrome(System.String)
+00007FFC168A25B8 00007ffc16974e50   NONE Methods.LongestCommonSubsequenceRecInner(System.String, System.String)
+00007FFC168A25C0 00007ffc16974e68   NONE Methods.LongestCommonSubsequenceRec(System.String, System.String)
+00007FFC168A25C8 00007ffc16974e80   NONE Methods.LongestCommonSubsequenceAll(System.String, System.String)
+00007FFC168A25D0 00007ffc16974e98   NONE Methods.LongestCommonSubsequence1(System.String, System.String)
+00007FFC168A25D8 00007ffc16974eb0   NONE Methods.KnapsackRec(Int32, System.Collections.Generic.IList`1, System.Collections.Generic.IList`1, WeightMaxInfo)
+00007FFC168A25E0 00007ffc16974ec8   NONE Methods.Knapsack(Int32, System.Collections.Generic.IList`1, System.Collections.Generic.IList`1)
+00007FFC168A25E8 00007ffc16974ee0   NONE Methods.Knapsack2(Int32, System.Collections.Generic.IList`1, System.Collections.Generic.IList`1)
+00007FFC168A25F0 00007ffc16974ef8   NONE Methods.Coins(Int32, System.Collections.Generic.IList`1)
+00007FFC168A25F8 00007ffc16974f10   NONE Methods.RodDP(Int32, System.Collections.Generic.IList`1, System.Collections.Generic.IList`1)
+00007FFC168A2600 00007ffc16974f28   NONE Methods.InitializeAgg(Int32, Int32)
+00007FFC168A2608 00007ffc16974f40   NONE Methods.InitializeAgg2(Int32, Int32)
+00007FFC168A2610 00007ffc16974f58   NONE Methods.InitializeLengthMaxInfoArray(Int32)
+00007FFC168A2618 00007ffc16974f70   NONE Methods.InitializeLengthMaxInfoArrayForMin(Int32)
+00007FFC168A2620 00007ffc16974f88   NONE Methods.InitializeWeightInfoArray2(Int32)
+00007FFC168A2628 00007ffc16974fa0   NONE Methods.Rod(Int32, System.Collections.Generic.IList`1, System.Collections.Generic.IList`1)
+00007FFC168A2630 00007ffc16974fb8   NONE Methods.RodRecursiveInner(Int32, System.Collections.Generic.IList`1, System.Collections.Generic.IList`1, System.Collections.Generic.IList`1)
+00007FFC168A2638 00007ffc16974fd0   NONE Methods.CalculateMax(System.Collections.Generic.IList`1, System.Collections.Generic.IList`1, System.Collections.Generic.IList`1)
+00007FFC168A2640 00007ffc16974fe8   NONE Methods.CalculateValue(System.Collections.Generic.IList`1, System.Collections.Generic.IList`1)
+00007FFC168A2648 00007ffc16975000   NONE Methods.Dice(Int32, Int32, Int32)
+00007FFC168A2650 00007ffc16975018   NONE Methods.TowerFunc(System.Collections.Generic.IList`1, Int32, Int32)
+00007FFC168A2658 00007ffc16975030   NONE Methods.MatrixMult(System.Collections.Generic.IList`1>)
+00007FFC168A2660 00007ffc16975048   NONE Methods.Partitions(System.Collections.Generic.IList`1)
+00007FFC168A2668 00007ffc16975060   NONE Methods.WordBreak(System.String, System.Collections.Generic.ISet`1)
+00007FFC168A2670 00007ffc16975078   NONE Methods.LCS3(System.String, System.String)
+00007FFC168A2678 00007ffc16975090   NONE Methods.AssemblyLine(Int32[,], Int32, Int32, Int32[], Int32[], Int32[,])
+00007FFC168A2680 00007ffc169750a8   NONE Methods.PalindromeK(System.String, Int32)
+00007FFC168A2688 00007ffc169750c0   NONE Methods.LongestIncreasingSubsequence(System.Collections.Generic.IList`1)
+00007FFC168A2690 00007ffc169750d8   NONE Methods.Stairs(Int32, Int32)
+00007FFC168A2698 00007ffc169750f0   NONE Methods.WeightedJobs(System.Collections.Generic.IList`1)
+00007FFC168A26A0 00007ffc16975108   NONE Methods.SetMoveRight(PotsOfGoldAgg[,], System.Collections.Generic.IList`1, Int32, Int32)
+00007FFC168A26A8 00007ffc16975120   NONE Methods.SetMoveLeft(PotsOfGoldAgg[,], System.Collections.Generic.IList`1, Int32, Int32)
+00007FFC168A26B0 00007ffc16975138    JIT Methods.PotsOfGold3(System.Collections.Generic.IList`1)
+00007FFC168A26B8 00007ffc16975150   NONE Methods.PotsOfGold2(System.Collections.Generic.IList`1)
+00007FFC168A26C0 00007ffc16975168   NONE Methods.PotsOfGold(System.Collections.Generic.IList`1)
+00007FFC168A26C8 00007ffc16975180   NONE Methods.MaxProductCutting(Int32)
+
+// dump il using method descriptor
+0:000> !dumpil 00007ffc16974e08
+ilAddr is 00000230E04029E8 pImport is 00000201E687B940
+ilAddr = 00000230E04029E8
+IL_0000: nop 
+IL_0001: ldarg.0 
+IL_0002: callvirt int32 System.String::get_Length()
+IL_0007: ldc.i4.2 
+IL_0008: div 
+IL_0009: stloc.0 
+IL_000a: ldc.i4.0 
+IL_000b: stloc.1 
+IL_000c: br.s IL_0039
+IL_000e: nop 
+IL_000f: ldarg.0 
+IL_0010: ldloc.1 
+IL_0011: callvirt char System.String::get_Chars(int32)
+IL_0016: ldarg.0 
+IL_0017: ldarg.0 
+IL_0018: callvirt int32 System.String::get_Length()
+IL_001d: ldloc.1 
+IL_001e: sub 
+IL_001f: ldc.i4.1 
+IL_0020: sub 
+IL_0021: callvirt char System.String::get_Chars(int32)
+IL_0026: ceq 
+IL_0028: ldc.i4.0 
+IL_0029: ceq 
+IL_002b: stloc.2 
+IL_002c: ldloc.2 
+IL_002d: brfalse.s IL_0034
+IL_002f: nop 
+IL_0030: ldc.i4.0 
+IL_0031: stloc.3 
+IL_0032: br.s IL_0047
+IL_0034: nop 
+IL_0035: ldloc.1 
+IL_0036: ldc.i4.1 
+IL_0037: add 
+IL_0038: stloc.1 
+IL_0039: ldloc.1 
+IL_003a: ldloc.0 
+IL_003b: clt 
+IL_003d: stloc.s VAR OR ARG 4
+IL_003f: ldloc.s VAR OR ARG 4
+IL_0041: brtrue.s IL_010e
+IL_0043: ldc.i4.1 
+IL_0044: stloc.3 
+IL_0045: br.s IL_0047
+IL_0047: ldloc.3 
+IL_0048: ret 
+
+
+
+
+
+!token2ee <module name (can be *)> <token of module> 
+
+!name2ee <module name (can be *)> <name of static class>
+
+.frame /r 3 (make sure its coreclr!CallDescrDataInternal
+0:000> dv
+           this = 0x00000089`88d7e6c0
+     pArguments = 0x00000089`88d7e7a8
+   pReturnValue = 0x00000000`00000000
+  cbReturnValue = 0n0
+   dwRegTypeMap = 0x1d
+  callDescrData = struct CallDescrData
+    nStackBytes = 4
+   fpReturnSize = <value unavailable>
+         pAlloc = 0x00000089`88d7e560 "???"
+            arg = 1
+            ofs = <value unavailable>
+   dwAllocaSize = <value unavailable>
+      stackSize = <value unavailable>
+           pSrc = <value unavailable>
+          pDest = <value unavailable>
+0:000> dx -r1 ((coreclr!MethodDescCallSite *)0x8988d7e6c0)
+((coreclr!MethodDescCallSite *)0x8988d7e6c0)                 : 0x8988d7e6c0 [Type: MethodDescCallSite *]
+    [+0x000] m_pMD            : 0x7ffc16958958 [Type: MethodDesc *]
+    [+0x008] m_pCallTarget    : 0x7ffc1688f110 [Type: unsigned __int64]
+    [+0x010] m_methodSig      [Type: MetaSig]
+    [+0x088] m_argIt          [Type: ArgIterator]
+0:000> dd 0x7ffc1688f110
+00007ffc`1688f110  003a8be9 01005f00 b9b673e8 00035e5f
+00007ffc`1688f120  16958958 00007ffc 519cf3e9 02005f19
+00007ffc`1688f130  519d2be9 01035f19 b9b653e8 00065e5f
+00007ffc`1688f140  16958a18 00007ffc 00000000 00000000
+00007ffc`1688f150  00000002 00000000 6f68ba49 7ffc1695
+00007ffc`1688f160  e9f80000 5fb9c9d8 6fb0ba49 7ffc1695
+00007ffc`1688f170  e9f80000 5fb9c9c8 6ff8ba49 7ffc1695
+00007ffc`1688f180  e9f80000 5fb9c9b8 7040ba49 7ffc1695
+0:000> !u 0x7ffc1688f110
+Unmanaged code
+00007ffc`1688f110 e98b3a0000      jmp     00007ffc`16892ba0
+00007ffc`1688f115 5f              pop     rdi
+00007ffc`1688f116 0001            add     byte ptr [rcx],al
+00007ffc`1688f118 e873b6b95f      call    coreclr!PrecodeFixupThunk (00007ffc`7642a790)
+00007ffc`1688f11d 5e              pop     rsi
+00007ffc`1688f11e 0300            add     eax,dword ptr [rax]
+00007ffc`1688f120 58              pop     rax
+00007ffc`1688f121 899516fc7f00    mov     dword ptr [rbp+7FFC16h],edx
+00007ffc`1688f127 00e9            add     cl,ch
+00007ffc`1688f129 f39c            rep pushfq
+
+
+jmp     00007ffc`16892ba0 is the jmp to jit compiled Program:
+0:000> !U /d 00007ffc16893170
+Normal JIT generated code
+Program.<Main>$(System.String[])
+ilAddr is 0000018F39112094 pImport is 00000201E73107C0
+Begin 00007FFC16892BA0, size 5db
+
+C:\Users\mfraz\source\repos\Practice\Practice\Program.cs @ 6:
+00007ffc`16892ba0 55              push    rbp

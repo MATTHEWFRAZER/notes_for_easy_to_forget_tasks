@@ -1,0 +1,22 @@
+pythonwindbg:
+
+python internals: https://bjg.io/debugging-python-in-windbg/
+
+install pyext: https://github.com/SeanCline/PyExt/releases
+
+uses autointerpreterstate to get the stack by finding tstate with thread id == system thread:
+look for python39!_PyRuntime.gilstate.autointerpreterstate
+and other python versions pythonxx!autointerpreterstate
+
+set breakpoint:
+import win32api
+win32api.DebugBreak()
+!pystack
+
+_PyEval_EvalFrameDefault is executed for every frame
+saw frame current object in rsi at appropriate frame
+to see the byte code:
+frame object f dv at _PyEval_EvalFrameDefault, 
+dt python39!PyCodeObject <address of f> it will be co_code object
+
+also !pyobj
