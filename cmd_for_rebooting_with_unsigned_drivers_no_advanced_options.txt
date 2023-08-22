@@ -1,0 +1,4 @@
+bcdedit /set testsigning on
+bcdedit -set loadoptions DISABLE_INTEGRITY_CHECKS
+
+reboot
