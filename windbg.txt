@@ -34,7 +34,7 @@ actual physical machine over ethernet local connection
 same set up on host (take into account that on reboot a machine gets an autoconfigured ip)
 for test machine:
 "C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\windbg.exe" -k net:port=<port within acceptable range>,key=<generated key>,target=<target auto-configured ip>
-also issue this command before reboot: bcdedit /set “{current}” bootmenupolicy legacy
+also issue this command before reboot: bcdedit /set â€œ{current}â€ bootmenupolicy legacy
 also Disable driver signature enforcement (press F8 and select "Disable driver signature enforcement" or press Shift + restart and select the same)
 
 *load symbols by parent directory
@@ -89,6 +89,8 @@ nt!RtlpBreakWithStatusInstruction:
 
 1: kd> .reload /user
 Loading User Symbols
+
+set userland break point: !ubp
 
 PyExt:
 https://github.com/SeanCline/PyExt/releases
