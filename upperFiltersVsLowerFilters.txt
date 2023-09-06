@@ -1,0 +1,3 @@
+1. Upper filters are drivers that handle/filter device access-requests from applications prior to passing them to the main device driver (fdo). The lower filters are drivers that handle/filter device
+   access-requests from the main device driver prior to passing them to the kernel driver (pdo). Deleting upper/lower filters may make it so devices no longer work. It all depends on the upper/lower
+   drivers themselves. Windows itself uses both upper and lower filters.
