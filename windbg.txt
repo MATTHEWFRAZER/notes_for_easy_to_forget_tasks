@@ -99,3 +99,15 @@ Open a dump file in WinDbg and load the extension with: .load pyext
 Add the Python symbol server to the symbol path with: .sympath+ srv*c:\symbols*http://pythonsymbols.sdcline.com/symbols/
 Use !pystack to see the Python backtrace at the time the dump was captured.
 !pyobj
+
+memory leak stuff:
+diagnosing memory leaks: https://www.deleaker.com/blog/2021/05/30/how-to-fix-memory-leaks-in-cpp-c-using-windbg/
+for userland
+use gflags set user strack tracing, bu ucrtbased!_CrtDumpMemoryLeaks
+add the following to your code:
+#define _CRTDBG_MAP_ALLOC
+#define _CRTDBG_MAP_ALLOC_NEW
+#include <crtdbg.h>
+#include <assert.h>
+
+add _CrtDumpMemoryLeaks(); to the end of your program or to the scope in question
