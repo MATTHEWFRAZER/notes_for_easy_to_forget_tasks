@@ -1,0 +1,5 @@
+1. Open target binary in IDA and analyze, resolve symbols, etc
+2. File -> Script File -> select export_symbols.idc
+3. output file <target_binary_name>.symbols.txt
+4. Open target binary in Ghidra, resolve symbols and then analyze
+5. Script Manager -> ImportSymbolsScript.py -> tell it to open previously generated <target_binary_name>.symbols.txt
