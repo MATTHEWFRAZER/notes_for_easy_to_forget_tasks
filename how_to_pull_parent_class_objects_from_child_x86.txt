@@ -1,0 +1,159 @@
+How to pull parent class objects from child object
+
+Example:
+
+class X
+{
+private:
+    int test = 3;
+public:
+    virtual void testx(void)
+    {
+        printf("hix %d\n", test);
+        test++;
+    }
+
+    
+};
+
+class C : public X
+{
+public:
+    virtual void testc(void)
+    {
+        printf("hic\n");
+    }
+    virtual void testc2(void)
+    {
+        printf("hi2c\n");
+    }
+};
+
+
+class A
+{
+public:
+    virtual void test(void)
+    {
+        printf("hi\n");
+    }
+    virtual void test2(void)
+    {
+        printf("hi2\n");
+    }
+};
+
+class Y
+{
+private:
+    int testingy = 0;
+public:
+    virtual void testy(void)
+    {
+        testingy++;
+        printf("testy %d\n", testingy);
+    }
+
+    
+};
+
+class B : A, C, Y
+{
+private:
+    int testing = 41;
+public:
+    virtual void test(void)
+    {
+        printf("test\n");
+        test2();
+        testc();
+        testx();
+        testy();
+    }
+    virtual void test2(void)
+    {
+        printf("%d\n", testing);
+    }
+
+    
+};
+
+int main(int argc, char* argv[])
+{
+   /* long x = strtol(argv[1], NULL, 10);
+    std::cout << "Hello World!" << x << "\n";
+    if (Test(x) != Test1(x))
+    {
+        std::cout << "hit" << std::endl;
+        abort();
+    }
+    */
+    B b;
+    b.test();
+    A a;
+    a.test();
+    B c;
+    c.test2();
+}
+
+0:000> uf  ConsoleApplication1!B::test
+ConsoleApplication1!B::test [C:\Users\Matthew\source\repos\ConsoleApplication1\ConsoleApplication1\ConsoleApplication1.cpp @ 71]:
+   71 00007ff6`4a531ce0 48894c2408      mov     qword ptr [rsp+8],rcx
+   71 00007ff6`4a531ce5 55              push    rbp
+   71 00007ff6`4a531ce6 57              push    rdi
+   71 00007ff6`4a531ce7 4881ecf8000000  sub     rsp,0F8h
+   71 00007ff6`4a531cee 488d6c2420      lea     rbp,[rsp+20h]
+15732480 00007ff6`4a531cf3 488d0d7c130100  lea     rcx,[ConsoleApplication1!_NULL_IMPORT_DESCRIPTOR <PERF> (ConsoleApplication1+0x23076) (00007ff6`4a543076)]
+15732480 00007ff6`4a531cfa e8cbf6ffff      call    ConsoleApplication1!ILT+965(__CheckForDebuggerJustMyCode) (00007ff6`4a5313ca)
+15732480 00007ff6`4a531cff 90              nop
+   72 00007ff6`4a531d00 488d0d61900000  lea     rcx,[ConsoleApplication1!`string' (00007ff6`4a53ad68)]
+   72 00007ff6`4a531d07 e8b6f4ffff      call    ConsoleApplication1!ILT+445(printf) (00007ff6`4a5311c2)
+   72 00007ff6`4a531d0c 90              nop
+   73 00007ff6`4a531d0d 488b85f0000000  mov     rax,qword ptr [rbp+0F0h]
+   73 00007ff6`4a531d14 488b00          mov     rax,qword ptr [rax]
+   73 00007ff6`4a531d17 488b8df0000000  mov     rcx,qword ptr [rbp+0F0h]
+   73 00007ff6`4a531d1e ff5008          call    qword ptr [rax+8]
+   73 00007ff6`4a531d21 90              nop
+   74 00007ff6`4a531d22 488b85f0000000  mov     rax,qword ptr [rbp+0F0h]
+   74 00007ff6`4a531d29 4883c008        add     rax,8
+   74 00007ff6`4a531d2d 488b8df0000000  mov     rcx,qword ptr [rbp+0F0h]
+   74 00007ff6`4a531d34 488b4908        mov     rcx,qword ptr [rcx+8]
+   74 00007ff6`4a531d38 48898dc0000000  mov     qword ptr [rbp+0C0h],rcx
+   74 00007ff6`4a531d3f 488bc8          mov     rcx,rax
+   74 00007ff6`4a531d42 488b85c0000000  mov     rax,qword ptr [rbp+0C0h]
+   74 00007ff6`4a531d49 ff5008          call    qword ptr [rax+8]
+   74 00007ff6`4a531d4c 90              nop
+   75 00007ff6`4a531d4d 488b85f0000000  mov     rax,qword ptr [rbp+0F0h]
+   75 00007ff6`4a531d54 4883c008        add     rax,8
+   75 00007ff6`4a531d58 488b8df0000000  mov     rcx,qword ptr [rbp+0F0h]
+   75 00007ff6`4a531d5f 488b4908        mov     rcx,qword ptr [rcx+8]
+   75 00007ff6`4a531d63 48898dc0000000  mov     qword ptr [rbp+0C0h],rcx
+   75 00007ff6`4a531d6a 488bc8          mov     rcx,rax
+   75 00007ff6`4a531d6d 488b85c0000000  mov     rax,qword ptr [rbp+0C0h]
+   75 00007ff6`4a531d74 ff10            call    qword ptr [rax]
+   75 00007ff6`4a531d76 90              nop
+   76 00007ff6`4a531d77 488b85f0000000  mov     rax,qword ptr [rbp+0F0h]
+   76 00007ff6`4a531d7e 4883c018        add     rax,18h
+   76 00007ff6`4a531d82 488b8df0000000  mov     rcx,qword ptr [rbp+0F0h]
+   76 00007ff6`4a531d89 488b4918        mov     rcx,qword ptr [rcx+18h]
+   76 00007ff6`4a531d8d 48898dc0000000  mov     qword ptr [rbp+0C0h],rcx
+   76 00007ff6`4a531d94 488bc8          mov     rcx,rax
+   76 00007ff6`4a531d97 488b85c0000000  mov     rax,qword ptr [rbp+0C0h]
+   76 00007ff6`4a531d9e ff10            call    qword ptr [rax]
+   76 00007ff6`4a531da0 90              nop
+   77 00007ff6`4a531da1 488da5d8000000  lea     rsp,[rbp+0D8h]
+   77 00007ff6`4a531da8 5f              pop     rdi
+   77 00007ff6`4a531da9 5d              pop     rbp
+   77 00007ff6`4a531daa c3              ret
+
+Note we find a method through retrieving an object mov     rax,qword ptr [rbp+0F0h]
+(see 00007ff6`4a531d0d). The vtable for B will be at 0x00. We simply add to it to
+find the target method call    qword ptr [rax+8] (see 00007ff6`4a531d49) 
+
+We find that rcx passed into the various methods is whatever vtable would be needed
+for the respective method calls. Not for testx (called through the C vtable) retrieves
+an object by getting object mov rax,[rbp+0xf0] and then adding to rax finds the vtable
+for add rax, 8 (see 00007ff6`4a531d29 and 00007ff6`4a531d54). Similarly for Y we
+see add rax, 18h (see 00007ff6`4a531d7e).
+
+For this example, release version inlined everything, but the basic principle is the same.
